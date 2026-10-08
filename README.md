@@ -82,3 +82,6 @@ PostgreSQL client such as pgAdmin or DBeaver.
 ## Related repositories
 - Backend (API): FastAPI — creates the same tables automatically if they do not exist
 - Frontend: React + TypeScript web application
+
+
+
