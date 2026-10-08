@@ -95,3 +95,6 @@ JOIN routes r            ON r.id = b.route_id
 JOIN v_route_overview ro ON ro.route_id = b.route_id;
 
 COMMIT;
+
+
+
