@@ -115,3 +115,5 @@ SELECT setval('trips_id_seq',      (SELECT MAX(id) FROM trips));
 SELECT setval('attendance_id_seq', (SELECT MAX(id) FROM attendance));
 
 COMMIT;
+
+
