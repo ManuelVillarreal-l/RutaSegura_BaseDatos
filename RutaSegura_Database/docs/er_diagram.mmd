@@ -1,0 +1,61 @@
+erDiagram
+    USERS ||--o{ STUDENTS : "is guardian of"
+    USERS ||--o{ TRIPS : "drives"
+    ROUTES ||--|{ STOPS : "has"
+    ROUTES ||--o{ STUDENTS : "assigned to"
+    ROUTES ||--o{ TRIPS : "runs as"
+    STOPS ||--o{ STUDENTS : "pickup stop"
+    STOPS ||--o{ ATTENDANCE : "happens at"
+    STUDENTS ||--o{ ATTENDANCE : "records"
+    TRIPS ||--o{ ATTENDANCE : "contains"
+
+    USERS {
+        int id PK
+        varchar name
+        varchar email UK
+        varchar password_hash
+        varchar role "guardian | driver | monitor | coordinator"
+        boolean active
+    }
+    ROUTES {
+        int id PK
+        varchar name UK
+        text description
+        boolean active
+    }
+    STOPS {
+        int id PK
+        int route_id FK
+        varchar name
+        int order "unique per route"
+        float latitude
+        float longitude
+    }
+    STUDENTS {
+        int id PK
+        varchar full_name
+        varchar grade
+        varchar school
+        varchar qr_code UK
+        int guardian_id FK
+        int route_id FK
+        int stop_id FK
+        boolean active
+    }
+    TRIPS {
+        int id PK
+        int route_id FK
+        int driver_id FK
+        varchar status "scheduled | in_progress | finished"
+        timestamp started_at "UTC"
+        timestamp finished_at "UTC"
+    }
+    ATTENDANCE {
+        int id PK
+        int student_id FK
+        int trip_id FK
+        int stop_id FK
+        varchar event_type "boarding | drop_off"
+        timestamp timestamp "UTC"
+        varchar method "qr | manual"
+    }
