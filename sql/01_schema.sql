@@ -142,3 +142,6 @@ CREATE INDEX ix_attendance_student_time ON attendance (student_id, "timestamp" D
 CREATE INDEX ix_attendance_trip_id ON attendance (trip_id);
 
 COMMIT;
+
+
+
