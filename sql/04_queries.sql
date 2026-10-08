@@ -70,3 +70,7 @@ SELECT role, COUNT(*) AS total
 FROM users
 GROUP BY role
 ORDER BY total DESC;
+
+
+
+
