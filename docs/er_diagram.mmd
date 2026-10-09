@@ -1,61 +1,287 @@
 erDiagram
-    USERS ||--o{ STUDENTS : "is guardian of"
-    USERS ||--o{ TRIPS : "drives"
-    ROUTES ||--|{ STOPS : "has"
-    ROUTES ||--o{ STUDENTS : "assigned to"
-    ROUTES ||--o{ TRIPS : "runs as"
-    STOPS ||--o{ STUDENTS : "pickup stop"
-    STOPS ||--o{ ATTENDANCE : "happens at"
-    STUDENTS ||--o{ ATTENDANCE : "records"
-    TRIPS ||--o{ ATTENDANCE : "contains"
-
-    USERS {
-        int id PK
-        varchar name
-        varchar email UK
-        varchar password_hash
-        varchar role "guardian | driver | monitor | coordinator"
+    check_in_methods {
+        integer id PK
+        string code UK
+        string name
         boolean active
     }
-    ROUTES {
-        int id PK
-        varchar name UK
-        text description
+    document_types {
+        integer id PK
+        string code UK
+        string name
         boolean active
     }
-    STOPS {
-        int id PK
-        int route_id FK
-        varchar name
-        int order "unique per route"
+    event_types {
+        integer id PK
+        string code UK
+        string name
+        boolean active
+    }
+    grades {
+        integer id PK
+        string code UK
+        string name
+        integer sort_order
+        boolean active
+    }
+    incident_types {
+        integer id PK
+        string code UK
+        string name
+        integer severity
+        boolean active
+    }
+    relationships {
+        integer id PK
+        string code UK
+        string name
+        boolean active
+    }
+    road_conditions {
+        integer id PK
+        string code UK
+        string name
+        integer delay_minutes
+        boolean active
+    }
+    roles {
+        integer id PK
+        string code UK
+        string name
+        string description
+        boolean active
+    }
+    schools {
+        integer id PK
+        string name UK
+        string dane_code UK
+        string municipality
+        string phone
+        boolean active
+    }
+    trip_statuses {
+        integer id PK
+        string code UK
+        string name
+        boolean active
+    }
+    vehicles {
+        integer id PK
+        string plate UK
+        string brand
+        integer model_year
+        integer capacity
+        boolean active
+    }
+    weather_conditions {
+        integer id PK
+        string code UK
+        string name
+        integer delay_minutes
+        string weather_codes
+        boolean active
+    }
+    campuses {
+        integer id PK
+        string name
+        integer school_id FK
+        string address
         float latitude
         float longitude
     }
-    STUDENTS {
-        int id PK
-        varchar full_name
-        varchar grade
-        varchar school
-        varchar qr_code UK
-        int guardian_id FK
-        int route_id FK
-        int stop_id FK
+    users {
+        integer id PK
+        integer role_id FK
+        integer document_type_id FK
+        string document_number
+        string first_name
+        string last_name
+        string email UK
+        string phone
+        string password_hash
+        boolean active
+        timestamp created_at
+        timestamp last_login_at
+    }
+    audit_logs {
+        integer id PK
+        integer user_id FK
+        string action
+        string entity
+        integer entity_id
+        string detail
+        timestamp created_at
+    }
+    drivers {
+        integer id PK
+        integer user_id FK,UK
+        string license_number UK
+        string license_category
+        date license_expires_on
+        integer vehicle_id FK
+    }
+    login_attempts {
+        integer id PK
+        string email
+        integer user_id FK
+        boolean success
+        string ip_address
+        timestamp created_at
+    }
+    notifications {
+        integer id PK
+        integer user_id FK
+        string kind
+        string title
+        string message
+        timestamp created_at
+        timestamp read_at
+    }
+    routes {
+        integer id PK
+        string name UK
+        string description
+        integer campus_id FK
+        integer vehicle_id FK
         boolean active
     }
-    TRIPS {
-        int id PK
-        int route_id FK
-        int driver_id FK
-        varchar status "scheduled | in_progress | finished"
-        timestamp started_at "UTC"
-        timestamp finished_at "UTC"
+    stops {
+        integer id PK
+        string name
+        integer route_id FK
+        integer order
+        float latitude
+        float longitude
     }
-    ATTENDANCE {
-        int id PK
-        int student_id FK
-        int trip_id FK
-        int stop_id FK
-        varchar event_type "boarding | drop_off"
-        timestamp timestamp "UTC"
-        varchar method "qr | manual"
+    trips {
+        integer id PK
+        integer route_id FK
+        integer driver_id FK
+        integer monitor_id FK
+        integer vehicle_id FK
+        integer status_id FK
+        integer weather_id FK
+        integer road_condition_id FK
+        string direction
+        date scheduled_date
+        timestamp started_at
+        timestamp finished_at
     }
+    delay_predictions {
+        integer id PK
+        integer route_id FK
+        integer trip_id FK
+        integer weather_id FK
+        integer road_condition_id FK
+        integer stops_remaining
+        float predicted_minutes
+        string model
+        integer created_by FK
+        timestamp created_at
+    }
+    incidents {
+        integer id PK
+        integer trip_id FK
+        integer incident_type_id FK
+        integer reported_by FK
+        string description
+        float latitude
+        float longitude
+        timestamp created_at
+        timestamp resolved_at
+    }
+    route_segments {
+        integer id PK
+        integer route_id FK
+        integer from_stop_id FK
+        integer to_stop_id FK
+        float distance_km
+        integer travel_minutes
+    }
+    students {
+        integer id PK
+        integer document_type_id FK
+        string document_number
+        string first_name
+        string last_name
+        date birth_date
+        integer grade_id FK
+        integer campus_id FK
+        integer route_id FK
+        integer stop_id FK
+        string qr_code UK
+        boolean active
+    }
+    vehicle_locations {
+        integer id PK
+        integer trip_id FK
+        float latitude
+        float longitude
+        float speed_kmh
+        float accuracy_m
+        timestamp recorded_at
+    }
+    attendance {
+        integer id PK
+        integer student_id FK
+        integer trip_id FK
+        integer stop_id FK
+        integer event_type_id FK
+        integer method_id FK
+        integer recorded_by FK
+        float latitude
+        float longitude
+        string client_event_id UK
+        timestamp timestamp
+    }
+    student_guardians {
+        integer id PK
+        integer student_id FK
+        integer guardian_id FK
+        integer relationship_id FK
+        boolean is_primary
+    }
+    schools ||--o{ campuses : "school_id"
+    document_types ||--o{ users : "document_type_id"
+    roles ||--o{ users : "role_id"
+    users |o--o{ audit_logs : "user_id"
+    vehicles |o--o{ drivers : "vehicle_id"
+    users ||--o| drivers : "user_id"
+    users |o--o{ login_attempts : "user_id"
+    users ||--o{ notifications : "user_id"
+    vehicles |o--o{ routes : "vehicle_id"
+    campuses ||--o{ routes : "campus_id"
+    routes ||--o{ stops : "route_id"
+    road_conditions |o--o{ trips : "road_condition_id"
+    routes ||--o{ trips : "route_id"
+    weather_conditions |o--o{ trips : "weather_id"
+    trip_statuses ||--o{ trips : "status_id"
+    vehicles |o--o{ trips : "vehicle_id"
+    users |o--o{ trips : "monitor_id"
+    users ||--o{ trips : "driver_id"
+    routes |o--o{ delay_predictions : "route_id"
+    users |o--o{ delay_predictions : "created_by"
+    road_conditions ||--o{ delay_predictions : "road_condition_id"
+    weather_conditions ||--o{ delay_predictions : "weather_id"
+    trips |o--o{ delay_predictions : "trip_id"
+    users ||--o{ incidents : "reported_by"
+    trips |o--o{ incidents : "trip_id"
+    incident_types ||--o{ incidents : "incident_type_id"
+    stops ||--o{ route_segments : "from_stop_id"
+    routes ||--o{ route_segments : "route_id"
+    stops ||--o{ route_segments : "to_stop_id"
+    document_types ||--o{ students : "document_type_id"
+    stops |o--o{ students : "stop_id"
+    routes |o--o{ students : "route_id"
+    campuses ||--o{ students : "campus_id"
+    grades ||--o{ students : "grade_id"
+    trips ||--o{ vehicle_locations : "trip_id"
+    check_in_methods ||--o{ attendance : "method_id"
+    event_types ||--o{ attendance : "event_type_id"
+    stops |o--o{ attendance : "stop_id"
+    students ||--o{ attendance : "student_id"
+    trips ||--o{ attendance : "trip_id"
+    users |o--o{ attendance : "recorded_by"
+    relationships ||--o{ student_guardians : "relationship_id"
+    users ||--o{ student_guardians : "guardian_id"
+    students ||--o{ student_guardians : "student_id"

@@ -19,7 +19,10 @@ import psycopg
 SQL_DIR = Path(__file__).resolve().parent / "sql"
 SETUP_FILES = ["01_schema.sql", "02_seed.sql", "03_views.sql"]
 QUERIES_FILE = "04_queries.sql"
-TABLES = ["users", "routes", "stops", "students", "trips", "attendance"]
+TABLES = [
+    "roles", "users", "weather_conditions", "road_conditions", "routes", "stops",
+    "route_segments", "students", "student_guardians", "trips", "attendance",
+]
 
 
 def normalize_url(url: str) -> str:
@@ -38,10 +41,14 @@ def run_setup(conn: psycopg.Connection) -> None:
     for file_name in SETUP_FILES:
         print(f"→ Ejecutando {file_name} ...")
         conn.execute((SQL_DIR / file_name).read_text(encoding="utf-8"))
+    total = conn.execute(
+        "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'"
+    ).fetchone()[0]
+    print(f"\nTablas creadas: {total}")
     print("\nResumen de registros:")
     for table in TABLES:
         count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-        print(f"  {table:<11} {count}")
+        print(f"  {table:<19} {count}")
 
 
 def run_queries(conn: psycopg.Connection) -> None:
