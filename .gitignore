@@ -2,3 +2,13 @@
 __pycache__/
 *.pyc
 .env
+
+# Editors and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local output of the example queries
+*.log
+resultados*.txt
