@@ -3,6 +3,7 @@
 Usage:
     python apply_database.py "<DATABASE_URL>"            # create tables + demo data + views
     python apply_database.py "<DATABASE_URL>" --queries  # only run the example queries (read-only)
+    python apply_database.py "<DATABASE_URL>" --check    # only show tables and record counts (read-only)
 
 The URL can also come from the DATABASE_URL environment variable.
 Messages are in Spanish because the user reads them.
@@ -41,14 +42,27 @@ def run_setup(conn: psycopg.Connection) -> None:
     for file_name in SETUP_FILES:
         print(f"→ Ejecutando {file_name} ...")
         conn.execute((SQL_DIR / file_name).read_text(encoding="utf-8"))
+    print_summary(conn, "Tablas creadas")
+
+
+def print_summary(conn: psycopg.Connection, title: str) -> int:
+    """Print the number of tables and the records of the main tables; return the table count."""
     total = conn.execute(
         "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'"
     ).fetchone()[0]
-    print(f"\nTablas creadas: {total}")
+    print(f"\n{title}: {total}")
+    existing = {
+        row[0]
+        for row in conn.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+    }
     print("\nResumen de registros:")
     for table in TABLES:
+        if table not in existing:
+            print(f"  {table:<19} (no existe)")
+            continue
         count = conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
         print(f"  {table:<19} {count}")
+    return total
 
 
 def run_queries(conn: psycopg.Connection) -> None:
@@ -66,6 +80,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Aplica los scripts SQL de RutaSegura.")
     parser.add_argument("url", nargs="?", default=os.getenv("DATABASE_URL"), help="URL de PostgreSQL")
     parser.add_argument("--queries", action="store_true", help="Solo ejecutar las consultas de ejemplo")
+    parser.add_argument("--check", action="store_true", help="Solo revisar tablas y registros (no cambia nada)")
     parser.add_argument("--yes", action="store_true", help="No pedir confirmación")
     args = parser.parse_args()
 
@@ -81,6 +96,11 @@ def main() -> int:
 
         if args.queries:
             run_queries(conn)
+            return 0
+
+        if args.check:
+            total = print_summary(conn, "Tablas encontradas")
+            print("\n✔ La base de datos responde." if total else "\n✘ La base de datos está vacía: ejecute el script sin --check.")
             return 0
 
         if not args.yes:
