@@ -88,3 +88,28 @@ FROM login_attempts
 WHERE NOT success AND created_at > (now() AT TIME ZONE 'UTC') - INTERVAL '24 hours'
 GROUP BY email
 ORDER BY failures DESC;
+
+-- =====================================================================
+-- Data the API loads into its data structures
+-- =====================================================================
+
+-- 16. Singly / doubly linked list: stops of each route in order (outbound).
+--     The return itinerary is the same list walked backwards.
+SELECT r.name AS route, s."order", s.name AS stop
+FROM routes r
+JOIN stops s ON s.route_id = r.id
+WHERE r.active
+ORDER BY r.id, s."order";
+
+-- 17. Graph: adjacency list of the road network (each segment is an edge with its weight)
+SELECT r.name AS route,
+       a.name AS from_stop,
+       b.name AS to_stop,
+       rs.distance_km,
+       rs.travel_minutes
+FROM route_segments rs
+JOIN stops a  ON a.id = rs.from_stop_id
+JOIN stops b  ON b.id = rs.to_stop_id
+JOIN routes r ON r.id = rs.route_id
+ORDER BY r.id, a."order", b."order";
+
