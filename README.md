@@ -4,7 +4,7 @@ PostgreSQL database of RutaSegura, the smart rural school transport system.
 
 This repository holds the SQL that defines and documents the database used by the
 [RutaSegura API](https://rutasegura-api-g7n4.onrender.com/docs). The database itself is
-hosted on Render (PostgreSQL 16). **28 tables**, 7 reporting views and 15 example queries.
+hosted on Render (PostgreSQL 16). **28 tables**, 7 reporting views and 19 example queries.
 
 ## Contents
 ```
@@ -12,7 +12,8 @@ sql/
   01_schema.sql     28 tables: primary/foreign keys, UNIQUE, CHECK constraints and indexes
   02_seed.sql       Demo data: catalogs, school, users, routes, students and 3 weeks of history
   03_views.sql      Reporting views
-  04_queries.sql    Example queries for reports and the presentation (read-only)
+  04_queries.sql    Example queries for reports and the presentation (read-only);
+                    16–19 show the data loaded into the lists, graph, BST and N-ary tree
 docs/
   er_diagram.png    Entity-relationship diagram
   er_diagram.mmd    Diagram source (Mermaid)
@@ -101,6 +102,9 @@ python apply_database.py "postgresql://USER:PASSWORD@HOST/DATABASE"
 
 # Run the example queries (read-only)
 python apply_database.py "postgresql://USER:PASSWORD@HOST/DATABASE" --queries
+
+# Only check that the database answers and has data (read-only)
+python apply_database.py "postgresql://USER:PASSWORD@HOST/DATABASE" --check
 ```
 
 On Render, use the **External Database URL** of `rutasegura-db`
