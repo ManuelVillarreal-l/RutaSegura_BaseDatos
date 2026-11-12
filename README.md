@@ -113,6 +113,24 @@ contains the database password.
 
 The demo history is moved automatically so that it always ends on the day the script runs.
 
+### Free Render databases expire
+A free Render PostgreSQL database expires **30 days after it is created** and is deleted
+14 days later. While it is expired the API keeps answering with a temporary SQLite copy
+(`/health` shows `sqlite-fallback`), but nothing is saved. To avoid that, move it to
+**Neon** (free plan, does not expire, no credit card):
+
+1. Create a project in https://neon.com, region **AWS US East**.
+2. In **Connect**, turn off *Connection pooling* and copy the URL
+   (`postgresql://USER:PASSWORD@ep-xxxx.us-east-1.aws.neon.tech/neondb?sslmode=require`).
+3. Run the scripts against it:
+   ```bash
+   python apply_database.py "<NEON URL>"
+   python apply_database.py "<NEON URL>" --check
+   ```
+4. In Render → `rutasegura-api` → **Environment**, put the Neon URL in `DATABASE_URL`,
+   save and deploy again. The URLs of the API and the web app do not change.
+5. Open https://rutasegura-api-g7n4.onrender.com/health: it must show `postgresql`.
+
 ## Demo users
 | Role | E-mail | Password |
 |---|---|---|
@@ -122,5 +140,7 @@ The demo history is moved automatically so that it always ends on the day the sc
 | guardian | acudiente@rutasegura.com · acudiente2@ · acudiente3@ · acudiente4@ | Acudiente123* |
 
 ## Related repositories
-- Backend (API): FastAPI — creates the same tables automatically if they do not exist
-- Frontend: React + TypeScript web application
+| Repository | Content | Deployed at |
+|---|---|---|
+| [Backend-API-](https://github.com/ManuelVillarreal-l/Backend-API-) | FastAPI — creates the same tables automatically if they do not exist | https://rutasegura-api-g7n4.onrender.com/docs |
+| [Frontend-RutaSegura](https://github.com/ManuelVillarreal-l/Frontend-RutaSegura) | React + TypeScript web application | https://rutasegura-web-lidi.onrender.com |
