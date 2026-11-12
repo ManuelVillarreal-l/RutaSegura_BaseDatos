@@ -113,3 +113,17 @@ JOIN stops b  ON b.id = rs.to_stop_id
 JOIN routes r ON r.id = rs.route_id
 ORDER BY r.id, a."order", b."order";
 
+-- 18. BST: keys used to find a student when the QR card is scanned
+SELECT qr_code AS bst_key, first_name || ' ' || last_name AS student
+FROM students
+WHERE active
+ORDER BY qr_code;
+
+-- 19. N-ary tree: school -> campus -> grade -> number of students (the leaves)
+SELECT sc.name AS school, c.name AS campus, g.name AS grade, COUNT(st.id) AS students
+FROM schools sc
+JOIN campuses c  ON c.school_id = sc.id
+JOIN students st ON st.campus_id = c.id AND st.active
+JOIN grades g    ON g.id = st.grade_id
+GROUP BY sc.name, c.name, g.name, g.sort_order
+ORDER BY sc.name, c.name, g.sort_order;
